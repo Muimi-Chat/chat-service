@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "ES2022",
+    "module": "ESNext", // Or another supported module system like "ES2022"
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "lib": ["ESNext"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+    }
+  },
+  "include": ["src/**/*", "drizzle.config.ts", "migrate.ts"]
+}

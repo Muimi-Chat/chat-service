@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # API App
+  chat-api:
+    image: node:20.13.1
+    command: >
+      bash -c "
+        cd app &&
+        npm install &&
+        npm run debug
+      "
+    env_file:
+      - .env
+    ports:
+      - "${API_EXTERNAL_PORT}:3000"
+    volumes:
+      - ./:/app
+    depends_on:
+      - chat-cache
+      - vector-database
+      - chat-database
+
+  chat-database:
+    image: mongo:8.0-rc
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    volumes:
+      - ./mongodata:/data/db:z
+
+  vector-database:
+    image: qdrant/qdrant:v1.9.3
+    volumes:
+      - "./qdrant_storage:/qdrant/storage:z"
+
+  chat-cache:
+    image: redis:7.2.4
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    # Runs on 6379 Docker
+    volumes:
+      - ./redisdata:/data:z
