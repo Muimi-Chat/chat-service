@@ -1,32 +1,39 @@
 {
-  "name": "muimi-chat-service",
+  "name": "muimi-chat-api",
   "version": "1.0.0",
-  "description": "Backend API Routes for Chatting with LLM",
+  "description": "",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
+    "generate-sql": "npx drizzle-kit generate --config ./drizzle.config.ts",
+    "migrate": "npx tsx migrate.ts",
     "debug": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "preview": "node dist/src/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Muimi-Chat/chat-service.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Muimi-Chat/chat-service/issues"
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.9.0",
+    "@types/crypto-js": "^4.2.2",
+    "argon2": "^0.40.3",
+    "crypto-js": "^4.2.0",
+    "drizzle-orm": "^0.30.10",
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "postgres": "^3.4.4",
+    "randomized-string": "^2.0.1",
+    "tsconfig-paths": "^4.2.0"
   },
-  "homepage": "https://github.com/Muimi-Chat/chat-service#readme",
   "devDependencies": {
-    "@types/node": "^20.12.12",
-    "fastify": "^4.27.0",
-    "fastify-mongodb": "^4.2.0",
-    "fastify-redis": "^4.4.0",
-    "nodemon": "^3.1.1",
-    "typescript": "^5.4.5"
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.11.6",
+    "drizzle-kit": "^0.21.4",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.11.0"
   }
 }
