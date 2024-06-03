@@ -41,7 +41,7 @@ export const message = pgTable('message', {
 	conversationID: serial('conversation_id').references(() => conversation.id, {onDelete: 'restrict'}).notNull(),
 	content: text('content').notNull(),
 	tokenCost: integer('token_cost').notNull(),
-	sender: messageAuthorEnum('sender'),
+	sender: messageAuthorEnum('sender').notNull(),
 	botModel: text('bot_model'),
 	creationDate: timestamp('creation_date', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull()
 }, (table) => {

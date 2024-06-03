@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { createClient } from 'redis';
 import insertLog from '../repositories/insertLog';
-import { REDIS_CONNECTION_STRING } from 'src/const';
 import fetchUserInformation from '../services/fetchUserInformation';
 import selectAccountByUUID from '../repositories/selectAccountByUUID';
 import insertAccountWithUUID from '../repositories/insertAccountWithUUID';
 import { uuid } from 'drizzle-orm/pg-core';
+import { REDIS_CONNECTION_STRING } from 'src/configs/redisConnectionString';
 
 export default async function getTokenCountController(req: Request, res: Response) {
     const client = createClient({

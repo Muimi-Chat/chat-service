@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { USER_SERVICE_API_CONFIG } from 'src/const';
 import insertLog from '../repositories/insertLog';
 import UserInformationInterface from '../interfaces/UserInformationInterface';
+import { USER_SERVICE_API_CONFIG } from 'src/configs/userServiceApiConfig';
 
 export default async function fetchUserInformation(sessionToken: string, userAgent: string, username: string) : Promise<UserInformationInterface> {
     try {
