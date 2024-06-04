@@ -23,6 +23,9 @@ import selectConversationByID from '../repositories/selectConversationByID';
 import createMessageHistoryChain from '../helpers/createMessageHistoryChain';
 import chatStream from '../services/openAI/chatStream';
 import insertReturningMessage from '../repositories/insertReturningMessage';
+import selectAccountByUUID from '../repositories/selectAccountByUUID';
+import { db } from 'src/db';
+import updateAccountTokenByUUID from '../repositories/updateAccountTokenByUUID';
 
 function getSenderUserUUID(data: any): Promise<string | null> {
     const sessionToken: string = data.session_token
@@ -41,6 +44,20 @@ export default async function chatMessageConsumer(socketClient: WebSocket, conte
         if (userUUID == null) {
             console.warn(`User (${data.username}) tried to send message but session token was bad.`)
             socketClient.send(JSON.stringify({ status: "BAD_SESSION", message: "Bad session token, user should login again!" }));
+            return
+        }
+        const matchingAccounts = await selectAccountByUUID(userUUID)
+        if (matchingAccounts.length <= 0) {
+            const warningMessage = `Client tried to login as ${data.username} (${userUUID}). But failed to match UUID in database.`
+            console.warn(warningMessage)
+            await insertLog(warningMessage, "WARNING")
+            socketClient.send(JSON.stringify({ status: "BAD_SESSION", message: "Bad session token, user should login again!" }));
+            return
+        }
+
+        const userAccountModel = matchingAccounts[0]
+        if (userAccountModel.token <= 0 && !userAccountModel.freeTokenUsage) {
+            socketClient.send(JSON.stringify({ status: "INSUFFICENT_TOKEN", message: "User have no tokens left for chatting!" }));
             return
         }
 
@@ -144,19 +161,28 @@ export default async function chatMessageConsumer(socketClient: WebSocket, conte
             }
         }
 
-        const userMessageObject = (await insertReturningMessage(conversationObject.id, message, promptTokenCost, "USER"))[0]
-        const botMessageObject = (await insertReturningMessage(conversationObject.id, botReply, completionTokenCost, "BOT", chatModel))[0]
+        // TODO: Sequencial undo in case of error....
+
+        let userMessageObject;
+        let botMessageObject
+        await db.transaction(async (tsx) => {
+            if (!userAccountModel.freeTokenUsage) {
+                await updateAccountTokenByUUID(userUUID, userAccountModel.token - promptTokenCost - completionTokenCost)
+            }
+            userMessageObject = (await insertReturningMessage(conversationObject.id, message, promptTokenCost, "USER"))[0]
+            botMessageObject = (await insertReturningMessage(conversationObject.id, botReply, completionTokenCost, "BOT", chatModel))[0]
+        })
 
         socketClient.send(JSON.stringify({ 
             status: "CHUNK_END",
             message: "Chunk has ended.",
             reply_content: botReply,
             user_message_data: {
-                id: userMessageObject.id,
+                id: userMessageObject!.id,
                 token_cost: promptTokenCost
             },
             bot_message_data: {
-                id: botMessageObject.id,
+                id: botMessageObject!.id,
                 token_cost: completionTokenCost
             }
         }));
