@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 import insertLog from "../repositories/insertLog";
-import { REDIS_CONNECTION_STRING } from 'src/const';
+import { REDIS_CONNECTION_STRING } from "src/configs/redisConnectionString";
 import fetchUserInformation from "../services/fetchUserInformation";
 
 /**
