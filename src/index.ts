@@ -6,6 +6,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 
 
 import tokenRoutes from './api/routes/tokenRoutes'
+import conversationRoutes from './api/routes/conversationRoutes'
 import chatMessageConsumer from './api/consumers/chatMessageConsumer';
 
 const app = express();
@@ -18,7 +19,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api-chat/token', tokenRoutes);
-
+app.use('/api-chat/', conversationRoutes);
 
 app.get('/api-chat/ping', (req, res) => {
 	res.send('Pong!');
