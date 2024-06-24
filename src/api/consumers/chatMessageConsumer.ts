@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import { RawData, WebSocket } from 'ws';
 import insertLog from '../repositories/insertLog';
 
 /**
@@ -36,9 +36,9 @@ function getSenderUserUUID(data: any): Promise<string | null> {
 }
 
 // TODO: Support custom system messages...
-export default async function chatMessageConsumer(socketClient: WebSocket, content: string) {
+export default async function chatMessageConsumer(socketClient: WebSocket, content: RawData) {
     try {
-        const data = JSON.parse(content)
+        const data = JSON.parse(content.toString())
 
         const userUUID = await getSenderUserUUID(data)
         if (userUUID == null) {
@@ -146,26 +146,27 @@ export default async function chatMessageConsumer(socketClient: WebSocket, conte
         // Start streaming in the message chunk by chunk
         const botReplyStream = await chatStream(openAiClient, messageChain, chatModel, userUUID)
         for await (const chunk of botReplyStream) {
-            const chunkContent = chunk.choices[0].delta.content
-            botReply += chunkContent
-            socketClient.send(JSON.stringify({ 
-                status: "CHUNK",
-                message: "This is a chunk of the bot's message...",
-                chunk_content: chunkContent
-            }));
-
-            // Last chunk, fetch the token cost.
-            if (chunk.choices[0].finish_reason == "stop") {
+            if (chunk.usage != null) {
                 promptTokenCost = chunk.usage!.prompt_tokens
                 completionTokenCost = chunk.usage!.completion_tokens
+                // Because a chunk with usage has no message...
+                continue; 
+            }
+
+            if (chunk.choices[0].finish_reason != "stop") {
+                const chunkContent = chunk.choices[0].delta.content
+                botReply += chunkContent
+                socketClient.send(JSON.stringify({ 
+                    status: "CHUNK",
+                    message: "This is a chunk of the bot's message...",
+                    chunk_content: chunkContent
+                }));
             }
         }
 
-        // TODO: Sequencial undo in case of error....
-
         let userMessageObject;
         let botMessageObject
-        await db.transaction(async (tsx) => {
+        await db.transaction(async () => {
             if (!userAccountModel.freeTokenUsage) {
                 await updateAccountTokenByUUID(userUUID, userAccountModel.token - promptTokenCost - completionTokenCost)
             }

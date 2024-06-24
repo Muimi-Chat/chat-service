@@ -6,14 +6,16 @@ import { USER_SERVICE_API_CONFIG } from 'src/configs/userServiceApiConfig';
 export default async function fetchUserInformation(sessionToken: string, userAgent: string, username: string) : Promise<UserInformationInterface> {
     try {
         const url = `${USER_SERVICE_API_CONFIG.SSL_ENABLED ? 'https://' : 'http://'}${USER_SERVICE_API_CONFIG.BASE_DOMAIN}/api-user/service-user-info?username=${username}`;
-        
+        console.log(url) 
         const response = await axios.get(url, {
             headers: {
                 'session-token': sessionToken,
                 'service-token': USER_SERVICE_API_CONFIG.API_TOKEN,
                 'user-agent': userAgent
             },
-            proxy: false
+            validateStatus: (status) => {
+                return status >= 200 && status < 500
+            }
         });
 
         const data = response.data;

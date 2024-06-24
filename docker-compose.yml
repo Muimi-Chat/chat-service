@@ -28,6 +28,8 @@ services:
       - chat-db
       - chat-vector-db
       - chat-cache
+    networks:
+      - muimi_container_network  
 
   chat-vector-db:
     image: qdrant/qdrant:v1.9.4
@@ -35,6 +37,8 @@ services:
       QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
     volumes:
       - "./qdrant_storage:/qdrant/storage:z"
+    networks:
+      - muimi_container_network  
 
   # database
   chat-db:
@@ -44,8 +48,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_MAIN_DB}
+    ports:
+      - "${POSTGRESQL_PORT}:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data:z
+    networks:
+      - muimi_container_network  
 
   chat-cache:
     image: redis:7.2.4
@@ -53,4 +61,9 @@ services:
     # Runs on 6379 Docker
     volumes:
       - ./redisdata:/data:z
+    networks:
+      - muimi_container_network  
 
+networks:
+  muimi_container_network:
+    external: true

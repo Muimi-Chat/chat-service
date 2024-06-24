@@ -10,7 +10,7 @@ export default async function selectConversationsByUserID(userID: string, select
     .where(and(
             eq(conversation.accountID, userID),
             eq(conversation.deleted, selectDeleted),
-            eq(conversation.archived, selectArchived)
+            selectArchived ? undefined : eq(conversation.archived, false)
         )  
     )
     .orderBy(desc(conversation.creationDate));

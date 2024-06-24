@@ -12,6 +12,7 @@ export default async function getTokenCountController(req: Request, res: Respons
         url: REDIS_CONNECTION_STRING
     });
 
+    console.log("Connecting to Redis");
     client.on('error', async (err: any) => {
         console.log('Connecting Redis Client Error', err);
         await insertLog(`Error connecting to Redis :: ${err}`);
@@ -32,20 +33,22 @@ export default async function getTokenCountController(req: Request, res: Respons
                     message: 'Missing required parameters'
                 });
             }
-
             // See if token exists in cache, if not, re-validate from user service,
             // then flag token as valid for 1 minute.
             let userUUID = await client.get(`${username}_${sessionToken}`);
             if (userUUID == null) {
+                console.log("User UUID not found in cache, revalidating from API");
                 let userInformation = await fetchUserInformation(sessionToken, userAgent, username)
                 if (userInformation.status != "SUCCESS") {
+                    console.log(`Failed to fetch user information with status :: ${userInformation.status}`)
                     await insertLog(`Failed to fetch user information with status :: ${userInformation.status}`, "WARNING")
                     return res.status(401).json({
-                        status: 'BAD_TOKEN',
+                        status: 'BAD_SESSION',
                         message: 'Session token is bad, relogin!'
                     });
                 }
 
+                console.log(`User UUID Revalidated :: ${userInformation.uuid}`);
                 userUUID = userInformation.uuid;
                 await client.set(`${username}_${sessionToken}`, userUUID, {
                     EX: 60,
