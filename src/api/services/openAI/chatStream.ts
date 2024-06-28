@@ -20,6 +20,6 @@ export default async function chatStream(openAiClient: OpenAI, messageChain: Cha
         messages: messageChain,
         stream: true,
         user: userID,
-        stream_options: {"include_usage": true}
+        stream_options: {include_usage: true}
     });
 }

@@ -51,7 +51,7 @@ export default async function getConversationMessages(req: Request, res: Respons
             "WARNING"
           );
           return res.status(401).json({
-            status: "BAD_TOKEN",
+            status: "BAD_SESSION",
             message: "Session token is bad, relogin!",
           });
         }

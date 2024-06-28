@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import insertLog from "src/api/repositories/insertLog";
 import { TITLE_CREATOR_BOT_MODEL } from "src/configs/titleCreatorBotModel";
+import trimString from "src/api/helpers/trimString";
 
 /**
  * 
