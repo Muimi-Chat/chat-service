@@ -10,7 +10,7 @@ export default async function insertReturningMessage(
 ) {
     return await db.insert(message).values({
         conversationID: conversationID,
-        content: content,
+        encryptedContent: content,
         tokenCost: tokenCost,
         sender: sender,
         botModel: botModel
