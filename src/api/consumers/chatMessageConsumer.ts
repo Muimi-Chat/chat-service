@@ -26,6 +26,7 @@ import insertReturningMessage from '../repositories/insertReturningMessage';
 import selectAccountByUUID from '../repositories/selectAccountByUUID';
 import { db } from 'src/db';
 import updateAccountTokenByUUID from '../repositories/updateAccountTokenByUUID';
+import requestEncrypt from '../services/crypt/requestEncrypt';
 
 function getSenderUserUUID(data: any): Promise<string | null> {
     const sessionToken: string = data.session_token
@@ -128,7 +129,7 @@ export default async function chatMessageConsumer(socketClient: WebSocket, conte
         // Form a message chain, to let the AI know histories + current message.
         // TODO: Handle attachments, images, document (RAG)
 
-        const messageChain = await createMessageHistoryChain(conversationObject.id)
+        const messageChain = await createMessageHistoryChain(userUUID, conversationObject.id)
         messageChain.push({
             role: "user",
             content: message
@@ -170,8 +171,16 @@ export default async function chatMessageConsumer(socketClient: WebSocket, conte
             if (!userAccountModel.freeTokenUsage) {
                 await updateAccountTokenByUUID(userUUID, userAccountModel.token - promptTokenCost - completionTokenCost)
             }
-            userMessageObject = (await insertReturningMessage(conversationObject.id, message, promptTokenCost, "USER"))[0]
-            botMessageObject = (await insertReturningMessage(conversationObject.id, botReply, completionTokenCost, "BOT", chatModel))[0]
+
+            const encryptPromises = [
+                requestEncrypt(userUUID, message, userUUID),
+                requestEncrypt(userUUID, botReply, userUUID)
+            ];
+
+            const [encryptedMessage, encryptedBotReply] = await Promise.all(encryptPromises);
+
+            userMessageObject = (await insertReturningMessage(conversationObject.id, encryptedMessage, promptTokenCost, "USER"))[0]
+            botMessageObject = (await insertReturningMessage(conversationObject.id, encryptedBotReply, promptTokenCost, "BOT", chatModel))[0]
         })
 
         socketClient.send(JSON.stringify({ 

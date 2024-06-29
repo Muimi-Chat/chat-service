@@ -5,6 +5,7 @@ import fetchUserInformation from "../services/fetchUserInformation";
 import { REDIS_CONNECTION_STRING } from "src/configs/redisConnectionString";
 import { selectMessagesByConversationID } from "../repositories/selectMessagesByConversationID";
 import selectConversationByID from "../repositories/selectConversationByID";
+import requestDecrypt from "../services/crypt/requestDecrypt";
 
 export default async function getConversationMessages(req: Request, res: Response) {
   const client = createClient({
@@ -86,18 +87,19 @@ export default async function getConversationMessages(req: Request, res: Respons
       const targetConversation = matchingConversations[0]
       const messages = await selectMessagesByConversationID(
         targetConversation.id,
-        100
+        300
       );
 
-      const result = messages.map((message) => ({
+      const resultPromises = messages.map(async (message) => ({
         id: message.id,
-        content: message.content,
+        content: await requestDecrypt(userUUID, message.encryptedContent, userUUID),
         author: message.sender,
         token_cost: message.tokenCost,
         created_at: message.creationDate,
         bot_model: message.botModel,
       }));
 
+      const result = await Promise.all(resultPromises);
       client.quit();
 
       return res.status(200).json({

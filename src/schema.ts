@@ -39,7 +39,7 @@ export const messageAuthorEnum = pgEnum('message_author_enum',
 export const message = pgTable('message', {
 	id: serial('id').primaryKey(),
 	conversationID: serial('conversation_id').references(() => conversation.id, {onDelete: 'restrict'}).notNull(),
-	content: text('content').notNull(),
+	encryptedContent: text('encrypted_content').notNull(),
 	tokenCost: integer('token_cost').notNull(),
 	sender: messageAuthorEnum('sender').notNull(),
 	botModel: text('bot_model'),

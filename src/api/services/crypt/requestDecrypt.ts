@@ -1,7 +1,7 @@
 import insertLog from "src/api/repositories/insertLog";
 import { CAPPU_AUTH_KEY, CAPPU_BASE_HTTP } from "src/configs/cryptorConfig";
 
-export default async function requestEncrypt(id: string, content: string, metadata: string = "") {
+export default async function requestDecrypt(id: string, content: string, metadata: string = "") {
     try {
         const formData = new FormData();
         formData.append('content', content);
