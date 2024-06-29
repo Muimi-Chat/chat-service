@@ -17,7 +17,7 @@ export async function selectMessagesByConversationID(conversationId: number, lim
             .select()
             .from(message)
             .where(eq(message.conversationID, conversationId))
-            .orderBy(desc(message.creationDate))
+            .orderBy(desc(message.creationDate), desc(message.id))
             .limit(limit)
             .offset(offset)
     } catch (error) {
