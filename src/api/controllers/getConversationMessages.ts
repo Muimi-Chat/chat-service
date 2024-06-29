@@ -90,7 +90,7 @@ export default async function getConversationMessages(req: Request, res: Respons
         300
       );
 
-      const resultPromises = messages.map(async (message) => ({
+      const resultPromises = messages.reverse().map(async (message) => ({
         id: message.id,
         content: await requestDecrypt(userUUID, message.encryptedContent, userUUID),
         author: message.sender,
