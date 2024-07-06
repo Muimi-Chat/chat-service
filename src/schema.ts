@@ -11,11 +11,14 @@ Index name should be `wrsm_sessionid_idx`
 
 import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint, bigint, boolean } from "drizzle-orm/pg-core";
 
-const defaultTokenCount = parseInt(process.env.DEFAULT_STARTING_TOKEN || "25000") ?? 25000;
+export const configuration = pgTable('configuration', {
+	id: serial('id').primaryKey(),
+	defaultUsersTokenCount: integer('default_users_token_count').notNull()
+})
 
 export const account = pgTable('account', {
 	id: uuid('id').primaryKey(),
-	token: integer('token').default(defaultTokenCount).notNull(),
+	token: integer('token').notNull(),
 	freeTokenUsage: boolean('free_token_usage').default(false).notNull()
 });
 

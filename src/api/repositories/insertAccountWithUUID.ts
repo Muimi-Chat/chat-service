@@ -3,11 +3,13 @@ import { account } from "src/schema";
 import insertLog from "./insertLog";
 
 export default async function insertAccountWithUUID(
-    uuid: string
+    uuid: string,
+    newTokenCount: number
 ) {
     try {
         return await db.insert(account).values({
-            id: uuid
+            id: uuid,
+            token: newTokenCount
         })
     } catch (err) {
         const message = `Failed to insert account with UUID (${uuid}) :: ${err}`
