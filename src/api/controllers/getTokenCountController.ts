@@ -6,6 +6,8 @@ import selectAccountByUUID from '../repositories/selectAccountByUUID';
 import insertAccountWithUUID from '../repositories/insertAccountWithUUID';
 import { uuid } from 'drizzle-orm/pg-core';
 import { REDIS_CONNECTION_STRING } from 'src/configs/redisConnectionString';
+import { db } from 'src/db';
+import { configuration } from 'src/schema';
 
 export default async function getTokenCountController(req: Request, res: Response) {
     const client = createClient({
@@ -62,10 +64,12 @@ export default async function getTokenCountController(req: Request, res: Respons
             let isFreeTokenUser = false
             const accountObject = await selectAccountByUUID(userUUID)
             if (accountObject.length <= 0) {
-                await insertAccountWithUUID(userUUID)
-                await insertLog(`Created new user in database :: ${uuid}`, "INFO");
-                const defaultTokenCount = parseInt(process.env.DEFAULT_STARTING_TOKEN || "25000") ?? 25000;
+                const globalConfig = await db.select().from(configuration);
+                const defaultTokenCount = globalConfig[0].defaultUsersTokenCount;
                 tokenCount = defaultTokenCount
+
+                await insertAccountWithUUID(userUUID, tokenCount)
+                await insertLog(`Created new user in database :: ${uuid}`, "INFO");
             } else {
                 tokenCount = accountObject[0].token
                 isFreeTokenUser = accountObject[0].freeTokenUsage
