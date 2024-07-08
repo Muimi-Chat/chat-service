@@ -3,6 +3,13 @@
 =======
 This repository contains backend services and APIs for chat-related functionalities in Muimi-Chat.
 
+Services provided:
+- Chat with GPT (OpenAI)
+- Chat Tokens 
+- Keep Track of Chat Conversations, History
+
+
+
 ## Running the Application with Docker
 
 To run the application using Docker, follow these steps:
