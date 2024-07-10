@@ -24,7 +24,7 @@
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
-    "drizzle-orm": "^0.30.10",
+    "drizzle-orm": "^0.31.2",
     "express": "^4.19.2",
     "express-ws": "^5.0.2",
     "openai": "^4.47.3",
