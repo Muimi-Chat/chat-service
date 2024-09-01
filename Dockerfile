@@ -1,5 +1,5 @@
 # Only for windows, to resolve CRLF to LF
-FROM node:20.13.1
+FROM node:20.17
 
 COPY ./ /app
 
